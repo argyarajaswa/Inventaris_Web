@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Inventaris Created by Argya</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="shortcut icon" href="logo.png">
+<meta name="theme-color" content="#4f46e5">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --radius: 14px;
+    --shadow: 0 4px 14px rgba(79, 70, 229, 0.08);
+  }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+    min-height: 100vh; color: var(--text); font-size: 14px;
+  }
+  body { padding: 12px; padding-bottom: 40px; }
+  .header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #fff; padding: 20px 16px; border-radius: var(--radius);
+    margin-bottom: 14px; box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
+    text-align: center;
+  }
+  .logo-header {
+    width: 88px; height: 88px; object-fit: contain;
+    border-radius: 50%; background: #ffffff; padding: 6px;
+    margin-bottom: 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    display: inline-block;
+  }
+  .header h1 { margin: 0; font-size: 20px; font-weight: 700; }
+  .header p { margin: 6px 0 0; font-size: 12px; opacity: 0.9; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat {
+    background: #fff; padding: 10px 6px; border-radius: 12px;
+    text-align: center; box-shadow: var(--shadow);
+    border-bottom: 3px solid var(--primary);
+  }
+  .stat .num { font-size: 18px; font-weight: 700; color: var(--primary); }
+  .stat .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .stat.baik { border-bottom-color: var(--success); }
+  .stat.baik .num { color: var(--success); }
+  .stat.rusak { border-bottom-color: var(--danger); }
+  .stat.rusak .num { color: var(--danger); }
+  .stat.perbaikan { border-bottom-color: var(--warning); }
+  .stat.perbaikan .num { color: var(--warning); }
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 12px; background: #fff;
+    padding: 5px; border-radius: 12px; box-shadow: var(--shadow);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: 1; min-width: 60px; background: transparent; color: var(--muted);
+    border: none; padding: 10px 4px; border-radius: 8px;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .tab-btn.active {
+    background: var(--primary); color: #fff;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+  }
+  .card {
+    background: #fff; padding: 14px; border-radius: var(--radius);
+    margin-bottom: 12px; box-shadow: var(--shadow);
+  }
+  .card h2 { margin: 0 0 10px; font-size: 15px; color: var(--primary); }
+  label {
+    display: block; font-size: 12px; font-weight: 600;
+    margin: 10px 0 4px; color: #374151;
+  }
+  input, select, textarea {
+    width: 100%; padding: 10px; font-size: 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: #f9fafb; font-family: inherit; color: var(--text);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--primary); background: #fff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  }
+  textarea { resize: vertical; min-height: 55px; }
+  .btn {
+    display: block; width: 100%; padding: 11px; font-size: 14px;
+    font-weight: 600; border: none; border-radius: 10px;
+    background: var(--primary); color: #fff; cursor: pointer;
+    margin-top: 10px; font-family: inherit; transition: all 0.15s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn.success { background: var(--success); }
+  .btn.danger { background: var(--danger); }
+  .btn.secondary { background: #9ca3af; }
+  .btn.small { padding: 8px; font-size: 12px; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .filter-box {
+    background: #fff; padding: 12px; border-radius: var(--radius);
+    margin-bottom: 12px; box-shadow: var(--shadow);
+  }
+  .filter-box .row { margin-top: 8px; }
+  .filter-box label { margin-top: 0; }
+  .ruangan-title {
+    font-size: 14px; font-weight: 700; color: var(--primary);
+    margin: 18px 0 8px; padding: 8px 12px;
+    background: linear-gradient(90deg, #eef2ff 0%, transparent 100%);
+    border-left: 4px solid var(--primary); border-radius: 6px;
+  }
+  .item {
+    background: #fff; border-radius: var(--radius); padding: 12px;
+    margin-bottom: 10px; box-shadow: var(--shadow);
+    border-left: 5px solid var(--primary);
+  }
+  .item.rusak { border-left-color: var(--danger); }
+  .item.baik { border-left-color: var(--success); }
+  .item.perbaikan { border-left-color: var(--warning); }
+  .item-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 8px; margin-bottom: 6px;
+  }
+  .item-header b { font-size: 15px; flex: 1; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 10px; font-weight: 700; color: #fff;
+    background: var(--success); text-transform: uppercase;
+    letter-spacing: 0.4px; white-space: nowrap;
+  }
+  .badge.rusak { background: var(--danger); }
+  .badge.perbaikan { background: var(--warning); }
+  .item .meta {
+    color: var(--muted); font-size: 12px; line-height: 1.7;
+    margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border);
+  }
+  .item img {
+    max-width: 100%; border-radius: 10px; margin-top: 8px;
+    border: 1px solid var(--border); cursor: pointer;
+  }
+  .item-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .item-actions .btn { margin: 0; padding: 8px; font-size: 12px; }
+  .galeri-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .galeri-card {
+    background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+  .galeri-card img {
+    width: 100%; height: 120px; object-fit: cover;
+    display: block; cursor: pointer; background: #f3f4f6;
+  }
+  .galeri-info { padding: 8px 10px; font-size: 12px; }
+  .galeri-info b { font-size: 13px; display: block; margin-bottom: 2px; }
+  .galeri-info .sub { color: var(--muted); font-size: 11px; line-height: 1.5; }
+  .galeri-info .badge { margin-top: 6px; }
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; z-index: 1000; padding: 16px;
+  }
+  .lightbox img { max-width: 100%; max-height: 70vh; border-radius: 10px; }
+  .lightbox .info {
+    color: #fff; text-align: center; margin-top: 12px;
+    font-size: 13px; line-height: 1.6;
+  }
+  .lightbox .close {
+    position: absolute; top: 14px; right: 14px; background: #fff;
+    color: #000; border: none; width: 40px; height: 40px;
+    border-radius: 50%; font-size: 18px; font-weight: bold;
+    cursor: pointer; line-height: 1;
+  }
+  .riwayat-item {
+    background: #fff; padding: 10px 12px; border-radius: 10px;
+    margin-bottom: 8px; font-size: 12px; box-shadow: var(--shadow);
+    border-left: 3px solid var(--primary);
+  }
+  .riwayat-item b { font-size: 13px; }
+  .riwayat-item .waktu {
+    color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.5;
+  }
+  .empty {
+    text-align: center; color: var(--muted); padding: 30px 20px;
+    font-size: 13px; background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; z-index: 999;
+  }
+  .modal {
+    background: #fff; border-radius: 16px; padding: 18px;
+    width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto;
+  }
+  .modal h3 { margin: 0 0 12px; color: var(--primary); font-size: 16px; }
+  .info-box {
+    background: #eef2ff; border-left: 4px solid var(--primary);
+    padding: 10px 12px; border-radius: 8px; font-size: 12px;
+    color: #374151; line-height: 1.6; margin-bottom: 10px;
+  }
+  .info-box.warning { background: #fef3c7; border-left-color: var(--warning); }
+  #statusSync {
+    display: none; padding: 10px 14px; border-radius: 10px;
+    margin-bottom: 10px; font-size: 13px; font-weight: 600; text-align: center;
+  }
+  #areaCetak { display: none; }
+  @media print {
+    body * { visibility: hidden; }
+    #areaCetak, #areaCetak * { visibility: visible; }
+    #areaCetak {
+      display: block !important; position: absolute; left: 0; top: 0;
+      width: 100%; padding: 20px; background: #fff;
+      font-family: 'Times New Roman', serif; color: #000;
+    }
+    #areaCetak h1 {
+      text-align: center; font-size: 20px; margin: 0 0 4px;
+      border-bottom: 2px solid #000; padding-bottom: 8px;
+    }
+    #areaCetak .sub { text-align: center; font-size: 11px; margin-bottom: 16px; }
+    #areaCetak table {
+      width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px;
+    }
+    #areaCetak th, #areaCetak td {
+      border: 1px solid #333; padding: 5px 6px;
+      text-align: left; vertical-align: top;
+    }
+    #areaCetak th {
+      background: #e5e7eb !important; font-weight: bold;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .ruangan-header td {
+      background: #e5e7eb !important; font-weight: bold;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .baris-rusak td {
+      background: #fee2e2 !important; color: #7f1d1d !important;
+      border: 1.5px solid #dc2626 !important; font-weight: bold !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .baris-rusak .nama-rusak {
+      color: #b91c1c !important; font-weight: bold !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .baris-rusak .kondisi-rusak {
+      color: #b91c1c !important; font-weight: bold !important;
+      text-transform: uppercase !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .baris-perbaikan td {
+      background: #fef3c7 !important; color: #78350f !important;
+      border: 1.5px solid #d97706 !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .baris-perbaikan .nama-perbaikan {
+      color: #b45309 !important; font-weight: bold !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .baris-perbaikan .kondisi-perbaikan {
+      color: #b45309 !important; font-weight: bold !important;
+      text-transform: uppercase !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .ringkasan {
+      margin-top: 14px; text-align: center; font-size: 12px;
+      font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #areaCetak .chip {
+      display: inline-block; padding: 4px 10px; border-radius: 20px;
+      margin: 0 4px;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #areaCetak .chip-baik { background: #d1fae5; color: #065f46; }
+    #areaCetak .chip-rusak { background: #fee2e2; color: #991b1b; border: 1px solid #dc2626; }
+    #areaCetak .chip-perbaikan { background: #fef3c7; color: #92400e; border: 1px solid #d97706; }
+    #areaCetak .footer { margin-top: 24px; font-size: 11px; text-align: right; }
+  }
+  @media (min-width: 900px) {
+    body {
+      max-width: 1100px; margin: 0 auto;
+      padding: 24px 20px 60px; font-size: 15px;
+    }
+    .header { padding: 32px 24px; margin-bottom: 20px; }
+    .logo-header { width: 110px; height: 110px; padding: 8px; }
+    .header h1 { font-size: 28px; letter-spacing: 0.5px; }
+    .header p { font-size: 14px; margin-top: 8px; }
+    .stats { gap: 14px; margin-bottom: 20px; }
+    .stat {
+      padding: 18px 10px; border-radius: 14px;
+      border-bottom-width: 4px; transition: transform 0.2s;
+    }
+    .stat:hover { transform: translateY(-3px); }
+    .stat .num { font-size: 26px; }
+    .stat .lbl { font-size: 12px; margin-top: 4px; }
+    .tabs { padding: 8px; gap: 6px; margin-bottom: 18px; }
+    .tab-btn { padding: 14px 12px; font-size: 14px; min-width: 100px; }
+    .filter-box { padding: 18px 20px; margin-bottom: 18px; }
+    .filter-box label { font-size: 13px; }
+    .filter-box input, .filter-box select { padding: 12px 14px; font-size: 15px; }
+    .filter-box .row { gap: 12px; }
+    .filter-box .btn {
+      display: inline-block; width: auto; min-width: 180px;
+      margin-right: 8px; margin-top: 14px; padding: 12px 20px;
+    }
+    #daftarBarang {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 14px; align-items: start;
+    }
+    #daftarBarang .ruangan-title {
+      grid-column: 1 / -1; margin: 6px 0 4px;
+      font-size: 15px; padding: 10px 16px;
+    }
+    #daftarBarang .empty { grid-column: 1 / -1; }
+    .item {
+      margin-bottom: 0; padding: 16px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(79, 70, 229, 0.15);
+    }
+    .item-header b { font-size: 16px; }
+    .item .meta { font-size: 13px; }
+    #view-tambah .card {
+      max-width: 700px; margin-left: auto; margin-right: auto; padding: 24px;
+    }
+    #view-tambah .card h2 { font-size: 18px; margin-bottom: 14px; }
+    #view-data .card { padding: 20px; }
+    #view-data .card h2 { font-size: 17px; }
+    .galeri-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .galeri-card img { height: 160px; }
+    #view-riwayat .card {
+      max-width: 800px; margin-left: auto; margin-right: auto;
+    }
+    #listRiwayat { max-width: 800px; margin-left: auto; margin-right: auto; }
+    #view-riwayat > .btn.danger {
+      max-width: 300px; margin-left: auto; margin-right: auto;
+    }
+    .modal { max-width: 480px; padding: 24px; }
+    .modal h3 { font-size: 18px; }
+    .btn { padding: 13px 18px; font-size: 15px; }
+    .btn.small { padding: 10px 14px; font-size: 13px; }
+    .item-actions { justify-content: flex-end; }
+    .item-actions .btn { width: auto; min-width: 100px; }
+  }
+  @media (min-width: 1400px) {
+    body { max-width: 1280px; }
+    #daftarBarang { grid-template-columns: repeat(3, 1fr); }
+    .galeri-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+</style>
+</head>
+  
+<body>
+
+<div class="header">
+  <img src="logo.png" alt="Logo Inventaris Argya" class="logo-header">
+  <h1>Web Inventaris Created by Argya</h1>
+  <p>Kelola, pantau, dan cetak laporan barang</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="num" id="statTotal">0</div>
+    <div class="lbl">Total</div>
+  </div>
+  <div class="stat baik">
+    <div class="num" id="statBaik">0</div>
+    <div class="lbl">Baik</div>
+  </div>
+  <div class="stat rusak">
+    <div class="num" id="statRusak">0</div>
+    <div class="lbl">Rusak</div>
+  </div>
+  <div class="stat perbaikan">
+    <div class="num" id="statPerbaikan">0</div>
+    <div class="lbl">Perbaikan</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button type="button" class="tab-btn active" data-tab="daftar">📋 Daftar</button>
+  <button type="button" class="tab-btn" data-tab="tambah">➕ Tambah</button>
+  <button type="button" class="tab-btn" data-tab="riwayat">🕒 Riwayat</button>
+  <button type="button" class="tab-btn" data-tab="galeri">🖼️ Galeri</button>
+  <button type="button" class="tab-btn" data-tab="data">💾 Data</button>
+</div>
+
+<div id="statusSync"></div>
+
+<div id="view-daftar">
+  <div class="filter-box">
+    <label>🔍 Cari Barang</label>
+    <input id="cari" placeholder="Ketik nama barang..." />
+    <div class="row">
+      <div>
+        <label>🏷️ Kondisi</label>
+        <select id="filterKondisi">
+          <option value="">Semua</option>
+          <option value="Baik">Baik</option>
+          <option value="Rusak">Rusak</option>
+          <option value="Perbaikan">Perbaikan</option>
+        </select>
+      </div>
+      <div>
+        <label>🏢 Ruangan</label>
+        <select id="filterRuangan">
+          <option value="">Semua</option>
+        </select>
+      </div>
+    </div>
+    <button type="button" class="btn success" id="btnBukaCetak">🖨️ Cetak Laporan</button>
+    <button type="button" class="btn secondary" id="btnResetFilter">🔄 Reset Filter</button>
+  </div>
+  <div id="daftarBarang"></div>
+</div>
+
+<div id="view-tambah" style="display:none;">
+  <div class="card">
+    <h2 id="formJudul">➕ Tambah Barang</h2>
+    <input type="hidden" id="editId" />
+    <label>Nama Barang *</label>
+    <input id="nama" placeholder="Contoh: Printer, Kursi, Meja" />
+    <label>Ruangan / Kelompok *</label>
+    <input id="ruangan" placeholder="Contoh: Ruang HRD" list="listRuangan" />
+    <datalist id="listRuangan"></datalist>
+    <div class="row">
+      <div>
+        <label>Jumlah</label>
+        <input id="jumlah" type="number" min="1" value="1" />
+      </div>
+      <div>
+        <label>Tanggal Periksa</label>
+        <input id="tanggal" type="date" />
+      </div>
+    </div>
+    <label>Kondisi</label>
+    <select id="kondisi">
+      <option value="Baik">✅ Baik</option>
+      <option value="Rusak">❌ Rusak</option>
+      <option value="Perbaikan">🔧 Dalam Perbaikan</option>
+    </select>
+    <label>Keterangan</label>
+    <textarea id="keterangan" placeholder="Catatan tambahan (opsional)"></textarea>
+    <label>Foto Barang Rusak (opsional)</label>
+    <input id="foto" type="file" accept="image/*" />
+    <button type="button" class="btn success" id="btnSimpan">💾 Simpan</button>
+    <button type="button" class="btn secondary" id="btnReset">❌ Batal / Reset</button>
+  </div>
+</div>
+
+<div id="view-riwayat" style="display:none;">
+  <div class="card">
+    <h2>🕒 Riwayat Pemeriksaan</h2>
+    <p style="font-size:12px;color:#6b7280;margin:0;">
+      Catatan otomatis setiap kali Anda menyimpan, mengubah, atau menghapus barang.
+    </p>
+  </div>
+  <div id="listRiwayat"></div>
+  <button type="button" class="btn danger" id="btnHapusRiwayat">🗑️ Hapus Semua Riwayat</button>
+</div>
+
+<div id="view-galeri" style="display:none;">
+  <div class="card">
+    <h2>🖼️ Galeri Foto Barang Rusak</h2>
+    <p style="font-size:12px;color:#6b7280;margin:0;">
+      Menampilkan barang kondisi <b>Rusak</b> atau <b>Perbaikan</b> yang memiliki foto.
+    </p>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>🏢 Ruangan</label>
+        <select id="galeriFilterRuangan">
+          <option value="">Semua</option>
+        </select>
+      </div>
+      <div>
+        <label>🏷️ Kondisi</label>
+        <select id="galeriFilterKondisi">
+          <option value="">Semua</option>
+          <option value="Rusak">❌ Rusak</option>
+          <option value="Perbaikan">🔧 Perbaikan</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="galeriContainer"></div>
+</div>
+
+<div id="view-data" style="display:none;">
+  <div class="card">
+    <h2>☁️ Sinkronisasi Google Sheets</h2>
+    <div class="info-box">
+      Data tersinkron otomatis dengan Google Sheets. Kalau ada perubahan dari
+      perangkat lain, klik <b>Ambil dari Cloud</b> untuk memuat data terbaru.
+    </div>
+    <button type="button" class="btn success" id="btnSyncKirim">📤 Kirim ke Cloud</button>
+    <button type="button" class="btn" id="btnSyncAmbil">📥 Ambil dari Cloud</button>
+    <button type="button" class="btn secondary" id="btnSyncCek">🔍 Cek Koneksi Backend</button>
+  </div>
+  <div class="card">
+    <h2>📊 Export Laporan (Excel)</h2>
+    <div class="info-box">
+      Unduh semua data sebagai file <b>Excel (.xlsx)</b> yang bisa dibuka di
+      <b>WPS Office</b> atau <b>Microsoft Excel</b>.
+    </div>
+    <button type="button" class="btn success" id="btnExportExcel">📥 Export ke Excel</button>
+    <button type="button" class="btn secondary" id="btnExportCSV">📄 Export ke CSV</button>
+  </div>
+  <div class="card">
+    <h2>📤 Import dari Excel / CSV</h2>
+    <div class="info-box warning">
+      <b>Perhatian:</b> Import akan <b>MENGGANTI</b> semua data yang ada sekarang.
+    </div>
+    <label>Pilih file Excel (.xlsx) atau CSV</label>
+    <input type="file" id="importFile" accept=".xlsx,.xls,.csv" />
+    <button type="button" class="btn" id="btnImport">📤 Mulai Import</button>
+  </div>
+  <div class="card">
+    <h2>💾 Backup Total (JSON + Foto)</h2>
+    <div class="info-box">File <b>JSON</b> berisi SEMUA data termasuk <b>foto</b>.</div>
+    <button type="button" class="btn success" id="btnExportJSON">💾 Backup JSON</button>
+    <label>Restore dari file JSON</label>
+    <input type="file" id="restoreFile" accept=".json" />
+    <button type="button" class="btn" id="btnRestoreJSON">📂 Restore dari JSON</button>
+  </div>
+  <div class="card">
+    <h2>🗑️ Reset Data</h2>
+    <div class="info-box warning">
+      Menghapus semua barang dan riwayat. Tidak bisa dibatalkan.
+    </div>
+    <button type="button" class="btn danger" id="btnResetSemua">🗑️ Hapus Semua Data</button>
+  </div>
+</div>
+
+<div id="modalCetak" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <h3>🖨️ Cetak Laporan</h3>
+    <label>Judul Laporan</label>
+    <input id="cetakJudul" value="Laporan Inventaris - Argya" />
+    <label>Nama Instansi (opsional)</label>
+    <input id="cetakInstansi" placeholder="Contoh: PT Maju Jaya" />
+    <label>Filter Ruangan</label>
+    <select id="cetakRuangan"><option value="">Semua Ruangan</option></select>
+    <label>Filter Kondisi</label>
+    <select id="cetakKondisi">
+      <option value="">Semua Kondisi</option>
+      <option value="Baik">Baik</option>
+      <option value="Rusak">Rusak</option>
+      <option value="Perbaikan">Perbaikan</option>
+    </select>
+    <label>Tanda Tangan (opsional)</label>
+    <input id="cetakTTD" placeholder="Contoh: Kepala Bagian Umum" />
+    <button type="button" class="btn success" id="btnCetakSekarang">🖨️ Cetak Sekarang</button>
+    <button type="button" class="btn secondary" id="btnTutupCetak">❌ Batal</button>
+  </div>
+</div>
+
+<div id="lightbox" class="lightbox" style="display:none;">
+  <button type="button" class="close" id="btnTutupLightbox">✕</button>
+  <img id="lightboxImg" src="" alt="Foto" />
+  <div class="info" id="lightboxInfo"></div>
+</div>
+
+<div id="areaCetak"></div>
+  
+<script>
+/* ============================================================
+   ⚠️⚠️⚠️ BAGIAN YANG WAJIB ANDA GANTI ⚠️⚠️⚠️
+   ------------------------------------------------------------
+   Baris di bawah ini adalah URL Backend Google Apps Script Anda.
+   Ganti tulisan di antara tanda kutip ' ' dengan URL Web App Anda.
+
+   Contoh URL yang benar:
+   var URL_BACKEND = 'https://script.google.com/macros/s/AKfycb.../exec';
+
+   Cara dapat URL:
+   1. Buka Apps Script → Deploy → Manage deployments
+   2. Copy URL di bagian "Web app"
+   ============================================================ */
+var URL_BACKEND = 'https://script.google.com/macros/s/AKfycbwcCQUpt0uOQOtbCnMN89YoGX4AWrJBzpTxJvpGcq4NHoGfsVhMDaNChgSRRb5TQ4tr/exec';
+
+/* Jangan ubah baris di bawah ini */
+var SYNC_OTOMATIS = true;
+var KEY_BARANG = 'inventaris_barang';
+var KEY_RIWAYAT = 'inventaris_riwayat';
+var barang = [];
+var riwayat = [];
+
+function $(id) { return document.getElementById(id); }
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function urlBackendSiap() {
+  return URL_BACKEND && URL_BACKEND.indexOf('http') === 0 &&
+         URL_BACKEND.indexOf('GANTI_DENGAN_URL_ANDA') === -1;
+}
+
+function muatData() {
+  try {
+    var b = localStorage.getItem(KEY_BARANG);
+    barang = b ? JSON.parse(b) : [];
+    if (!Array.isArray(barang)) barang = [];
+  } catch (e) { barang = []; }
+  try {
+    var r = localStorage.getItem(KEY_RIWAYAT);
+    riwayat = r ? JSON.parse(r) : [];
+    if (!Array.isArray(riwayat)) riwayat = [];
+  } catch (e) { riwayat = []; }
+}
+
+function simpanBarang() { localStorage.setItem(KEY_BARANG, JSON.stringify(barang)); }
+function simpanRiwayat() { localStorage.setItem(KEY_RIWAYAT, JSON.stringify(riwayat)); }
+
+function tampilkanStatusPesan(pesan, tipe) {
+  var el = $('statusSync');
+  if (!el) return;
+  el.textContent = pesan;
+  el.style.display = 'block';
+  if (tipe === 'error') { el.style.background = '#fee2e2'; el.style.color = '#991b1b'; }
+  else if (tipe === 'sukses') { el.style.background = '#d1fae5'; el.style.color = '#065f46'; }
+  else { el.style.background = '#dbeafe'; el.style.color = '#1e40af'; }
+  if (tipe !== 'loading') {
+    clearTimeout(window._statusTimer);
+    window._statusTimer = setTimeout(function () { el.style.display = 'none'; }, 3500);
+  }
+}
+
+function pindahTab(namaTab) {
+  var views = ['daftar', 'tambah', 'riwayat', 'galeri', 'data'];
+  var i;
+  for (i = 0; i < views.length; i++) {
+    var el = $('view-' + views[i]);
+    if (el) el.style.display = 'none';
+  }
+  var btns = document.querySelectorAll('.tab-btn');
+  for (i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  var aktifBtn = document.querySelector('.tab-btn[data-tab="' + namaTab + '"]');
+  if (aktifBtn) aktifBtn.classList.add('active');
+  var tampil = $('view-' + namaTab);
+  if (tampil) tampil.style.display = 'block';
+  if (namaTab === 'daftar') renderDaftar();
+  if (namaTab === 'riwayat') renderRiwayat();
+  if (namaTab === 'galeri') renderGaleri();
+  window.scrollTo(0, 0);
+}
+
+function updateStatistik() {
+  var total = 0, baik = 0, rusak = 0, perbaikan = 0;
+  var i;
+  for (i = 0; i < barang.length; i++) {
+    var b = barang[i];
+    var j = parseInt(b.jumlah) || 0;
+    total += j;
+    if (b.kondisi === 'Baik') baik += j;
+    else if (b.kondisi === 'Rusak') rusak += j;
+    else if (b.kondisi === 'Perbaikan') perbaikan += j;
+  }
+  $('statTotal').textContent = total;
+  $('statBaik').textContent = baik;
+  $('statRusak').textContent = rusak;
+  $('statPerbaikan').textContent = perbaikan;
+}
+
+function renderDaftar() {
+  var keyword = ($('cari').value || '').toLowerCase().trim();
+  var fKondisi = $('filterKondisi').value;
+  var fRuangan = $('filterRuangan').value;
+  var container = $('daftarBarang');
+  var i;
+
+  var ruanganUnik = [];
+  for (i = 0; i < barang.length; i++) {
+    if (ruanganUnik.indexOf(barang[i].ruangan) === -1) {
+      ruanganUnik.push(barang[i].ruangan);
+    }
+  }
+  ruanganUnik.sort();
+  var nilaiTerpilih = $('filterRuangan').value;
+  var optHtml = '<option value="">Semua</option>';
+  for (i = 0; i < ruanganUnik.length; i++) {
+    optHtml += '<option value="' + escapeHtml(ruanganUnik[i]) + '">' + escapeHtml(ruanganUnik[i]) + '</option>';
+  }
+  $('filterRuangan').innerHTML = optHtml;
+  $('filterRuangan').value = nilaiTerpilih;
+  var dlHtml = '';
+  for (i = 0; i < ruanganUnik.length; i++) {
+    dlHtml += '<option value="' + escapeHtml(ruanganUnik[i]) + '"></option>';
+  }
+  $('listRuangan').innerHTML = dlHtml;
+
+  var hasil = barang.filter(function (b) {
+    var cariNama = b.nama.toLowerCase().indexOf(keyword) !== -1;
+    var cariRuang = b.ruangan.toLowerCase().indexOf(keyword) !== -1;
+    var cocokKeyword = keyword === '' || cariNama || cariRuang;
+    var cocokKondisi = !fKondisi || b.kondisi === fKondisi;
+    var cocokRuangan = !fRuangan || b.ruangan === fRuangan;
+    return cocokKeyword && cocokKondisi && cocokRuangan;
+  });
+
+  if (hasil.length === 0) {
+    container.innerHTML = '<div class="empty">Belum ada barang yang cocok dengan filter.</div>';
+    updateStatistik();
+    return;
+  }
+
+  hasil.sort(function (a, b) {
+    var c = a.ruangan.localeCompare(b.ruangan);
+    if (c !== 0) return c;
+    return a.nama.localeCompare(b.nama);
+  });
+
+  var html = '';
+  var ruanganSekarang = '';
+  for (i = 0; i < hasil.length; i++) {
+    var b = hasil[i];
+    if (b.ruangan !== ruanganSekarang) {
+      ruanganSekarang = b.ruangan;
+      html += '<div class="ruangan-title">🏢 ' + escapeHtml(b.ruangan) + '</div>';
+    }
+    var kelasKondisi = 'baik';
+    if (b.kondisi === 'Rusak') kelasKondisi = 'rusak';
+    else if (b.kondisi === 'Perbaikan') kelasKondisi = 'perbaikan';
+    html += '<div class="item ' + kelasKondisi + '">';
+    html += '<div class="item-header">';
+    html += '<b>' + escapeHtml(b.nama) + '</b>';
+    html += '<span class="badge ' + kelasKondisi + '">' + escapeHtml(b.kondisi) + '</span>';
+    html += '</div>';
+    html += '<div class="meta">';
+    html += '🔢 Jumlah: <b>' + b.jumlah + '</b><br>';
+    html += '📅 Periksa: ' + escapeHtml(b.tanggal || '-');
+    if (b.keterangan) html += '<br>📝 ' + escapeHtml(b.keterangan);
+    html += '<br><span style="font-size:10px;">🔄 Update: ' + escapeHtml(b.diupdate || '-') + '</span>';
+    html += '</div>';
+    if (b.foto) html += '<img src="' + b.foto + '" alt="Foto" data-foto-id="' + b.id + '" />';
+    html += '<div class="item-actions">';
+    html += '<button type="button" class="btn small" data-edit-id="' + b.id + '">✏️ Edit</button>';
+    html += '<button type="button" class="btn small danger" data-hapus-id="' + b.id + '">🗑️ Hapus</button>';
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+  updateStatistik();
+
+  var editBtns = container.querySelectorAll('[data-edit-id]');
+  for (i = 0; i < editBtns.length; i++) {
+    editBtns[i].addEventListener('click', function () {
+      mulaiEdit(this.getAttribute('data-edit-id'));
+    });
+  }
+  var hapusBtns = container.querySelectorAll('[data-hapus-id]');
+  for (i = 0; i < hapusBtns.length; i++) {
+    hapusBtns[i].addEventListener('click', function () {
+      konfirmasiHapus(this.getAttribute('data-hapus-id'));
+    });
+  }
+  var fotoImgs = container.querySelectorAll('[data-foto-id]');
+  for (i = 0; i < fotoImgs.length; i++) {
+    fotoImgs[i].addEventListener('click', function () {
+      bukaLightbox(this.getAttribute('data-foto-id'));
+    });
+  }
+}
+
+function resetForm() {
+  $('editId').value = '';
+  $('nama').value = '';
+  $('ruangan').value = '';
+  $('jumlah').value = 1;
+  $('tanggal').value = '';
+  $('kondisi').value = 'Baik';
+  $('keterangan').value = '';
+  $('foto').value = '';
+  $('formJudul').textContent = '➕ Tambah Barang';
+}
+
+function simpanFormBarang() {
+  var id = $('editId').value;
+  var nama = $('nama').value.trim();
+  var ruangan = $('ruangan').value.trim();
+  var jumlah = parseInt($('jumlah').value) || 1;
+  var tanggal = $('tanggal').value;
+  var kondisi = $('kondisi').value;
+  var keterangan = $('keterangan').value.trim();
+  var fileFoto = $('foto').files[0];
+  if (!nama || !ruangan) { alert('Nama barang dan ruangan wajib diisi!'); return; }
+
+  function lanjut(fotoData) {
+    var sekarang = new Date().toLocaleString('id-ID');
+    var i;
+    if (id) {
+      var idx = -1;
+      for (i = 0; i < barang.length; i++) {
+        if (String(barang[i].id) === String(id)) { idx = i; break; }
+      }
+      if (idx !== -1) {
+        barang[idx].nama = nama;
+        barang[idx].ruangan = ruangan;
+        barang[idx].jumlah = jumlah;
+        barang[idx].tanggal = tanggal;
+        barang[idx].kondisi = kondisi;
+        barang[idx].keterangan = keterangan;
+        if (fotoData !== undefined) barang[idx].foto = fotoData;
+        barang[idx].diupdate = sekarang;
+        tambahRiwayat('✏️ Mengubah barang: ' + nama, kondisi, keterangan);
+      }
+    } else {
+      barang.push({
+        id: Date.now(), nama: nama, ruangan: ruangan, jumlah: jumlah,
+        tanggal: tanggal, kondisi: kondisi, keterangan: keterangan,
+        foto: fotoData || '', dibuat: sekarang, diupdate: sekarang
+      });
+      tambahRiwayat('➕ Menambah barang: ' + nama, kondisi, keterangan);
+    }
+    simpanBarang();
+    resetForm();
+    pindahTab('daftar');
+    if (SYNC_OTOMATIS && urlBackendSiap()) {
+      setTimeout(function () { kirimKeCloud(true); }, 500);
+    }
+  }
+
+  if (fileFoto) {
+    var reader = new FileReader();
+    reader.onload = function (e) { lanjut(e.target.result); };
+    reader.readAsDataURL(fileFoto);
+  } else {
+    lanjut(undefined);
+  }
+}
+
+function mulaiEdit(id) {
+  var b = null, i;
+  for (i = 0; i < barang.length; i++) {
+    if (String(barang[i].id) === String(id)) { b = barang[i]; break; }
+  }
+  if (!b) return;
+  $('editId').value = b.id;
+  $('nama').value = b.nama;
+  $('ruangan').value = b.ruangan;
+  $('jumlah').value = b.jumlah;
+  $('tanggal').value = b.tanggal || '';
+  $('kondisi').value = b.kondisi;
+  $('keterangan').value = b.keterangan || '';
+  $('formJudul').textContent = '✏️ Edit Barang';
+  pindahTab('tambah');
+}
+
+function konfirmasiHapus(id) {
+  var b = null, i;
+  for (i = 0; i < barang.length; i++) {
+    if (String(barang[i].id) === String(id)) { b = barang[i]; break; }
+  }
+  if (!b) return;
+  if (!confirm('Hapus barang "' + b.nama + '"?')) return;
+  var baru = [];
+  for (i = 0; i < barang.length; i++) {
+    if (String(barang[i].id) !== String(id)) baru.push(barang[i]);
+  }
+  barang = baru;
+  simpanBarang();
+  tambahRiwayat('🗑️ Menghapus barang: ' + b.nama, '-', '-');
+  renderDaftar();
+  if (SYNC_OTOMATIS && urlBackendSiap()) {
+    setTimeout(function () { kirimKeCloud(true); }, 500);
+  }
+}
+
+function tambahRiwayat(aksi, kondisi, keterangan) {
+  riwayat.unshift({
+    waktu: new Date().toLocaleString('id-ID'),
+    aksi: aksi, kondisi: kondisi, keterangan: keterangan
+  });
+  if (riwayat.length > 200) riwayat = riwayat.slice(0, 200);
+  simpanRiwayat();
+}
+
+function renderRiwayat() {
+  var container = $('listRiwayat');
+  if (riwayat.length === 0) {
+    container.innerHTML = '<div class="empty">Belum ada riwayat.</div>';
+    return;
+  }
+  var html = '', i;
+  for (i = 0; i < riwayat.length; i++) {
+    var r = riwayat[i];
+    html += '<div class="riwayat-item">';
+    html += '<b>' + escapeHtml(r.aksi) + '</b>';
+    html += '<div class="waktu">';
+    html += 'Kondisi: ' + escapeHtml(r.kondisi);
+    if (r.keterangan && r.keterangan !== '-') {
+      html += ' • Ket: ' + escapeHtml(r.keterangan);
+    }
+    html += '<br>🕒 ' + escapeHtml(r.waktu);
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderGaleri() {
+  var container = $('galeriContainer');
+  var fRuangan = $('galeriFilterRuangan').value;
+  var fKondisi = $('galeriFilterKondisi').value;
+  var i;
+  var dataGaleri = [];
+  for (i = 0; i < barang.length; i++) {
+    var b = barang[i];
+    var adaFoto = b.foto && b.foto.length > 0;
+    var kondisiOk = b.kondisi === 'Rusak' || b.kondisi === 'Perbaikan';
+    var cocokRuangan = !fRuangan || b.ruangan === fRuangan;
+    var cocokKondisi = !fKondisi || b.kondisi === fKondisi;
+    if (adaFoto && kondisiOk && cocokRuangan && cocokKondisi) dataGaleri.push(b);
+  }
+  var ruanganGaleri = [];
+  for (i = 0; i < barang.length; i++) {
+    var bb = barang[i];
+    var adaFoto2 = bb.foto && bb.foto.length > 0;
+    var kondisiOk2 = bb.kondisi === 'Rusak' || bb.kondisi === 'Perbaikan';
+    if (adaFoto2 && kondisiOk2 && ruanganGaleri.indexOf(bb.ruangan) === -1) {
+      ruanganGaleri.push(bb.ruangan);
+    }
+  }
+  ruanganGaleri.sort();
+  var nilaiSekarang = $('galeriFilterRuangan').value;
+  var optHtml = '<option value="">Semua</option>';
+  for (i = 0; i < ruanganGaleri.length; i++) {
+    optHtml += '<option value="' + escapeHtml(ruanganGaleri[i]) + '">' + escapeHtml(ruanganGaleri[i]) + '</option>';
+  }
+  $('galeriFilterRuangan').innerHTML = optHtml;
+  $('galeriFilterRuangan').value = nilaiSekarang;
+
+  if (dataGaleri.length === 0) {
+    container.innerHTML = '<div class="empty">Belum ada foto barang rusak/perbaikan.</div>';
+    return;
+  }
+  dataGaleri.sort(function (a, b) {
+    var c = a.ruangan.localeCompare(b.ruangan);
+    if (c !== 0) return c;
+    return a.nama.localeCompare(b.nama);
+  });
+  var html = '<div class="galeri-grid">';
+  for (i = 0; i < dataGaleri.length; i++) {
+    var g = dataGaleri[i];
+    var kelasBadge = g.kondisi === 'Rusak' ? 'rusak' : 'perbaikan';
+    html += '<div class="galeri-card">';
+    html += '<img src="' + g.foto + '" alt="Foto" data-foto-id="' + g.id + '" />';
+    html += '<div class="galeri-info">';
+    html += '<b>' + escapeHtml(g.nama) + '</b>';
+    html += '<div class="sub">🏢 ' + escapeHtml(g.ruangan) + '<br>📅 ' + escapeHtml(g.tanggal || '-') + '</div>';
+    html += '<span class="badge ' + kelasBadge + '">' + escapeHtml(g.kondisi) + '</span>';
+    html += '</div></div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+  var fotoImgs = container.querySelectorAll('[data-foto-id]');
+  for (i = 0; i < fotoImgs.length; i++) {
+    fotoImgs[i].addEventListener('click', function () {
+      bukaLightbox(this.getAttribute('data-foto-id'));
+    });
+  }
+}
+
+function bukaLightbox(id) {
+  var b = null, i;
+  for (i = 0; i < barang.length; i++) {
+    if (String(barang[i].id) === String(id)) { b = barang[i]; break; }
+  }
+  if (!b || !b.foto) return;
+  $('lightboxImg').src = b.foto;
+  var info = '<b>' + escapeHtml(b.nama) + '</b><br>';
+  info += '🏢 ' + escapeHtml(b.ruangan) + ' • 🔢 ' + b.jumlah + '<br>';
+  info += (b.kondisi === 'Rusak' ? '❌ ' : '🔧 ') + escapeHtml(b.kondisi);
+  if (b.keterangan) info += '<br>📝 ' + escapeHtml(b.keterangan);
+  $('lightboxInfo').innerHTML = info;
+  $('lightbox').style.display = 'flex';
+}
+
+function tutupLightbox() { $('lightbox').style.display = 'none'; }
+
+function bukaModalCetak() {
+  var ruanganUnik = [], i;
+  for (i = 0; i < barang.length; i++) {
+    if (ruanganUnik.indexOf(barang[i].ruangan) === -1) {
+      ruanganUnik.push(barang[i].ruangan);
+    }
+  }
+  ruanganUnik.sort();
+  var optHtml = '<option value="">Semua Ruangan</option>';
+  for (i = 0; i < ruanganUnik.length; i++) {
+    optHtml += '<option value="' + escapeHtml(ruanganUnik[i]) + '">' + escapeHtml(ruanganUnik[i]) + '</option>';
+  }
+  $('cetakRuangan').innerHTML = optHtml;
+  $('modalCetak').style.display = 'flex';
+}
+
+function tutupModalCetak() { $('modalCetak').style.display = 'none'; }
+
+function prosesCetak() {
+  var judul = $('cetakJudul').value || 'Laporan Inventaris - Argya';
+  var instansi = $('cetakInstansi').value.trim();
+  var fRuangan = $('cetakRuangan').value;
+  var fKondisi = $('cetakKondisi').value;
+  var ttd = $('cetakTTD').value.trim();
+  var i;
+  var data = [];
+  for (i = 0; i < barang.length; i++) {
+    var b = barang[i];
+    var cekR = !fRuangan || b.ruangan === fRuangan;
+    var cekK = !fKondisi || b.kondisi === fKondisi;
+    if (cekR && cekK) data.push(b);
+  }
+  if (data.length === 0) { alert('Tidak ada data untuk dicetak.'); return; }
+  data.sort(function (a, b) {
+    var c = a.ruangan.localeCompare(b.ruangan);
+    if (c !== 0) return c;
+    return a.nama.localeCompare(b.nama);
+  });
+  var barisTabel = '', ruanganSekarang = '', no = 0, totalBarang = 0;
+  for (i = 0; i < data.length; i++) {
+    var d = data[i];
+    totalBarang += parseInt(d.jumlah) || 0;
+    if (d.ruangan !== ruanganSekarang) {
+      ruanganSekarang = d.ruangan;
+      barisTabel += '<tr class="ruangan-header"><td colspan="6">🏢 ' + escapeHtml(ruanganSekarang) + '</td></tr>';
+    }
+    no++;
+    var kelasBaris = '', kelasKondisiTxt = '', kelasNamaTxt = '', ikonKondisi = '';
+    if (d.kondisi === 'Rusak') {
+      kelasBaris = 'baris-rusak'; kelasKondisiTxt = 'kondisi-rusak';
+      kelasNamaTxt = 'nama-rusak'; ikonKondisi = '❌ ';
+    } else if (d.kondisi === 'Perbaikan') {
+      kelasBaris = 'baris-perbaikan'; kelasKondisiTxt = 'kondisi-perbaikan';
+      kelasNamaTxt = 'nama-perbaikan'; ikonKondisi = '🔧 ';
+    }
+    barisTabel += '<tr class="' + kelasBaris + '">';
+    barisTabel += '<td>' + no + '</td>';
+    barisTabel += '<td class="' + kelasNamaTxt + '">' + escapeHtml(d.nama) + '</td>';
+    barisTabel += '<td style="text-align:center;">' + d.jumlah + '</td>';
+    barisTabel += '<td class="' + kelasKondisiTxt + '">' + ikonKondisi + escapeHtml(d.kondisi) + '</td>';
+    barisTabel += '<td>' + escapeHtml(d.tanggal || '-') + '</td>';
+    barisTabel += '<td>' + escapeHtml(d.keterangan || '-') + '</td>';
+    barisTabel += '</tr>';
+  }
+  var totalJenis = data.length;
+  var tanggalCetak = new Date().toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+  var filterInfo = [];
+  if (fRuangan) filterInfo.push('Ruangan: ' + fRuangan);
+  if (fKondisi) filterInfo.push('Kondisi: ' + fKondisi);
+  var filterText = filterInfo.length ? filterInfo.join(' • ') : 'Semua Data';
+  var jmlRusak = 0, jmlPerbaikan = 0, jmlBaik = 0;
+  for (i = 0; i < data.length; i++) {
+    var dd = data[i];
+    if (dd.kondisi === 'Rusak') jmlRusak += parseInt(dd.jumlah) || 0;
+    else if (dd.kondisi === 'Perbaikan') jmlPerbaikan += parseInt(dd.jumlah) || 0;
+    else jmlBaik += parseInt(dd.jumlah) || 0;
+  }
+  var html = '';
+  if (instansi) html += '<div style="text-align:center;font-size:14px;font-weight:bold;margin-bottom:4px;">' + escapeHtml(instansi) + '</div>';
+  html += '<h1>' + escapeHtml(judul) + '</h1>';
+  html += '<div class="sub">Filter: ' + escapeHtml(filterText) + ' • Dicetak: ' + tanggalCetak + '</div>';
+  html += '<table><thead><tr>';
+  html += '<th style="width:5%;text-align:center;">No</th>';
+  html += '<th style="width:28%;">Nama Barang</th>';
+  html += '<th style="width:9%;text-align:center;">Jml</th>';
+  html += '<th style="width:13%;">Kondisi</th>';
+  html += '<th style="width:15%;">Tgl Periksa</th>';
+  html += '<th style="width:30%;">Keterangan</th>';
+  html += '</tr></thead><tbody>';
+  html += barisTabel;
+  html += '<tr style="font-weight:bold;background:#f3f4f6;">';
+  html += '<td colspan="2" style="text-align:right;">TOTAL</td>';
+  html += '<td style="text-align:center;">' + totalBarang + '</td>';
+  html += '<td colspan="3">' + totalJenis + ' jenis barang</td>';
+  html += '</tr></tbody></table>';
+  html += '<div class="ringkasan">';
+  html += '<span class="chip chip-baik">✅ Baik: ' + jmlBaik + '</span> ';
+  html += '<span class="chip chip-rusak">❌ Rusak: ' + jmlRusak + '</span> ';
+  html += '<span class="chip chip-perbaikan">🔧 Perbaikan: ' + jmlPerbaikan + '</span>';
+  html += '</div>';
+  if (ttd) {
+    html += '<div class="footer"><div>' + tanggalCetak + '</div>';
+    html += '<div style="margin-top:60px;border-top:1px solid #000;display:inline-block;padding-top:4px;min-width:180px;">' + escapeHtml(ttd) + '</div></div>';
+  }
+  $('areaCetak').innerHTML = html;
+  tutupModalCetak();
+  setTimeout(function () { window.print(); }, 250);
+}
+
+function tarikDariCloud(silent) {
+  if (!urlBackendSiap()) {
+    if (!silent) alert('URL Backend belum diisi. Baca panduan di kode.');
+    return;
+  }
+  if (!silent) tampilkanStatusPesan('⏳ Mengambil data dari Google Sheets...', 'loading');
+  fetch(URL_BACKEND + '?aksi=ambilSemua')
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      if (!res.ok) throw new Error(res.pesan || 'Gagal ambil data');
+      barang = res.barang || [];
+      simpanBarang();
+      renderDaftar();
+      updateStatistik();
+      tampilkanStatusPesan((silent ? '☁️ Tersinkron dari cloud' : '✅ Berhasil ambil') +
+        ' (' + barang.length + ' barang)', 'sukses');
+    })
+    .catch(function (err) {
+      tampilkanStatusPesan('❌ Gagal ambil data: ' + err.message, 'error');
+    });
+}
+
+function kirimKeCloud(silent) {
+  if (!urlBackendSiap()) {
+    if (!silent) alert('URL Backend belum diisi. Baca panduan di kode.');
+    return;
+  }
+  var barangSiapKirim = JSON.parse(JSON.stringify(barang));
+  var totalFoto = 0, selesaiFoto = 0, i;
+  for (i = 0; i < barangSiapKirim.length; i++) {
+    var b = barangSiapKirim[i];
+    if (b.foto && b.foto.indexOf('data:image') === 0) totalFoto++;
+  }
+  function lanjutKirim() {
+    if (!silent) tampilkanStatusPesan('⏳ Mengirim data ke Google Sheets...', 'loading');
+    fetch(URL_BACKEND, {
+      method: 'POST',
+      body: JSON.stringify({ aksi: 'simpanSemua', barang: barangSiapKirim })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.pesan || 'Gagal kirim data');
+        return fetch(URL_BACKEND + '?aksi=ambilSemua').then(function (r) { return r.json(); });
+      })
+      .then(function (res) {
+        if (res.ok) {
+          barang = res.barang || [];
+          simpanBarang();
+          renderDaftar();
+          updateStatistik();
+        }
+        tampilkanStatusPesan((silent ? '☁️ Tersimpan ke cloud' : '✅ Berhasil kirim') +
+          ' (' + barangSiapKirim.length + ' barang)', 'sukses');
+      })
+      .catch(function (err) {
+        tampilkanStatusPesan('❌ Gagal kirim data: ' + err.message, 'error');
+      });
+  }
+  if (totalFoto > 0) {
+    if (!silent) tampilkanStatusPesan('⏳ Mengunggah ' + totalFoto + ' foto...', 'loading');
+    for (i = 0; i < barangSiapKirim.length; i++) {
+      (function (idx) {
+        var b = barangSiapKirim[idx];
+        if (b.foto && b.foto.indexOf('data:image') === 0) {
+          fetch(URL_BACKEND, {
+            method: 'POST',
+            body: JSON.stringify({
+              aksi: 'uploadFoto',
+              namaFile: 'barang_' + b.id + '_' + Date.now(),
+              dataBase64: b.foto
+            })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+              if (res.ok && res.url) {
+                b.foto = res.url;
+                for (var k = 0; k < barang.length; k++) {
+                  if (String(barang[k].id) === String(b.id)) {
+                    barang[k].foto = res.url; break;
+                  }
+                }
+                simpanBarang();
+              }
+              selesaiFoto++;
+              if (selesaiFoto === totalFoto) lanjutKirim();
+            })
+            .catch(function () {
+              selesaiFoto++;
+              if (selesaiFoto === totalFoto) lanjutKirim();
+            });
+        }
+      })(i);
+    }
+  } else {
+    lanjutKirim();
+  }
+}
+
+function cekKoneksiBackend() {
+  if (!urlBackendSiap()) {
+    alert('URL Backend belum diisi di kode.');
+    return;
+  }
+  tampilkanStatusPesan('⏳ Mengecek koneksi backend...', 'loading');
+  fetch(URL_BACKEND + '?aksi=ping')
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      if (res.ok) tampilkanStatusPesan('✅ Backend aktif • ' + (res.waktu || ''), 'sukses');
+      else tampilkanStatusPesan('❌ ' + res.pesan, 'error');
+    })
+    .catch(function (err) {
+      tampilkanStatusPesan('❌ Gagal koneksi: ' + err.message, 'error');
+    });
+}
+
+function tanggalFileHariIni() {
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var dd = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + dd;
+}
+
+function unduhBlob(blob, namaFile) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = namaFile;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+function exportExcel() {
+  if (barang.length === 0) { alert('Belum ada data.'); return; }
+  if (typeof XLSX === 'undefined') { alert('Library Excel belum siap.'); return; }
+  var rows = [['No', 'Nama Barang', 'Ruangan', 'Jumlah', 'Kondisi',
+    'Tanggal Periksa', 'Keterangan', 'Terakhir Update']];
+  var i;
+  for (i = 0; i < barang.length; i++) {
+    var b = barang[i];
+    rows.push([i + 1, b.nama || '', b.ruangan || '', b.jumlah || 0,
+      b.kondisi || '', b.tanggal || '', b.keterangan || '', b.diupdate || '']);
+  }
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 18 }, { wch: 8 },
+    { wch: 12 }, { wch: 15 }, { wch: 30 }, { wch: 20 }];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Inventaris');
+  XLSX.writeFile(wb, 'inventaris_argya_' + tanggalFileHariIni() + '.xlsx');
+  alert('File Excel berhasil dibuat.');
+}
+
+function exportCSV() {
+  if (barang.length === 0) { alert('Belum ada data.'); return; }
+  function csvCell(v) {
+    v = (v === null || v === undefined) ? '' : String(v);
+    if (v.indexOf('"') !== -1 || v.indexOf(',') !== -1 || v.indexOf('\n') !== -1) {
+      v = '"' + v.replace(/"/g, '""') + '"';
+    }
+    return v;
+  }
+  var lines = [];
+  lines.push(['No', 'Nama Barang', 'Ruangan', 'Jumlah', 'Kondisi',
+    'Tanggal Periksa', 'Keterangan', 'Terakhir Update'].map(csvCell).join(','));
+  var i;
+  for (i = 0; i < barang.length; i++) {
+    var b = barang[i];
+    lines.push([i + 1, b.nama || '', b.ruangan || '', b.jumlah || 0,
+      b.kondisi || '', b.tanggal || '', b.keterangan || '', b.diupdate || ''].map(csvCell).join(','));
+  }
+  var csv = '\uFEFF' + lines.join('\r\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  unduhBlob(blob, 'inventaris_argya_' + tanggalFileHariIni() + '.csv');
+  alert('File CSV berhasil dibuat.');
+}
+
+function importDariFile() {
+  var fileInput = $('importFile');
+  var file = fileInput.files[0];
+  if (!file) { alert('Pilih file dulu.'); return; }
+  if (typeof XLSX === 'undefined') { alert('Library Excel belum siap.'); return; }
+  if (!confirm('Import akan MENGGANTI semua data. Lanjutkan?')) {
+    fileInput.value = ''; return;
+  }
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      if (rows.length < 2) { alert('File kosong.'); return; }
+      var header = rows[0].map(function (h) { return String(h).toLowerCase().trim(); });
+      var idx = {
+        nama: cariIndex(header, ['nama barang', 'nama']),
+        ruangan: cariIndex(header, ['ruangan', 'kelompok']),
+        jumlah: cariIndex(header, ['jumlah', 'jml']),
+        kondisi: cariIndex(header, ['kondisi']),
+        tanggal: cariIndex(header, ['tanggal periksa', 'tanggal']),
+        keterangan: cariIndex(header, ['keterangan', 'ket'])
+      };
+      if (idx.nama === -1 || idx.ruangan === -1) { alert('Kolom tidak ditemukan.'); return; }
+      var baru = [];
+      var sekarang = new Date().toLocaleString('id-ID');
+      var i;
+      for (i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        if (!r || r.length === 0) continue;
+        var nama = String(r[idx.nama] || '').trim();
+        if (!nama) continue;
+        baru.push({
+          id: Date.now() + i, nama: nama,
+          ruangan: String(r[idx.ruangan] || '').trim(),
+          jumlah: parseInt(r[idx.jumlah]) || 1,
+          kondisi: String(r[idx.kondisi] || 'Baik').trim(),
+          tanggal: formatTanggalExcel(r[idx.tanggal]),
+          keterangan: String(r[idx.keterangan] || '').trim(),
+          foto: '', dibuat: sekarang, diupdate: sekarang
+        });
+      }
+      if (baru.length === 0) { alert('Tidak ada data valid.'); return; }
+      barang = baru;
+      simpanBarang();
+      tambahRiwayat('📤 Import: ' + file.name + ' (' + baru.length + ' barang)', '-', '-');
+      fileInput.value = '';
+      alert('Berhasil import ' + baru.length + ' barang.');
+      pindahTab('daftar');
+      if (SYNC_OTOMATIS && urlBackendSiap()) {
+        setTimeout(function () { kirimKeCloud(true); }, 500);
+      }
+    } catch (err) { alert('Gagal: ' + err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function cariIndex(header, kandidat) {
+  var i, j;
+  for (j = 0; j < kandidat.length; j++) {
+    for (i = 0; i < header.length; i++) {
+      if (header[i].indexOf(kandidat[j]) !== -1) return i;
+    }
+  }
+  return -1;
+}
+
+function formatTanggalExcel(v) {
+  if (!v) return '';
+  if (typeof v === 'number') {
+    var d = new Date((v - 25569) * 86400 * 1000);
+    var y = d.getUTCFullYear();
+    var m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    var dd = String(d.getUTCDate()).padStart(2, '0');
+    return y + '-' + m + '-' + dd;
+  }
+  return String(v).trim();
+}
+
+function exportJSON() {
+  if (barang.length === 0 && riwayat.length === 0) { alert('Belum ada data.'); return; }
+  var paket = {
+    aplikasi: 'web-inventaris-argya', versi: 1,
+    tanggalBackup: new Date().toLocaleString('id-ID'),
+    barang: barang, riwayat: riwayat
+  };
+  var json = JSON.stringify(paket);
+  var blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  unduhBlob(blob, 'backup_inventaris_argya_' + tanggalFileHariIni() + '.json');
+  alert('Backup JSON berhasil.');
+}
+
+function restoreJSON() {
+  var fileInput = $('restoreFile');
+  var file = fileInput.files[0];
+  if (!file) { alert('Pilih file JSON dulu.'); return; }
+  if (!confirm('Restore akan MENGGANTI semua data. Lanjutkan?')) {
+    fileInput.value = ''; return;
+  }
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var paket = JSON.parse(e.target.result);
+      if (!paket || !paket.barang || !Array.isArray(paket.barang)) {
+        alert('File JSON tidak valid.'); return;
+      }
+      barang = paket.barang;
+      riwayat = (paket.riwayat && Array.isArray(paket.riwayat)) ? paket.riwayat : [];
+      simpanBarang();
+      simpanRiwayat();
+      tambahRiwayat('📂 Restore: ' + file.name, '-', '-');
+      fileInput.value = '';
+      alert('Restore berhasil. ' + barang.length + ' barang.');
+      pindahTab('daftar');
+      if (SYNC_OTOMATIS && urlBackendSiap()) {
+        setTimeout(function () { kirimKeCloud(true); }, 500);
+      }
+    } catch (err) { alert('Gagal: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function resetSemua() {
+  if (!confirm('Yakin HAPUS SEMUA DATA?')) return;
+  if (!confirm('Konfirmasi terakhir: data akan hilang permanen.')) return;
+  barang = [];
+  riwayat = [];
+  simpanBarang();
+  simpanRiwayat();
+  alert('Semua data telah dihapus.');
+  pindahTab('daftar');
+  if (SYNC_OTOMATIS && urlBackendSiap()) {
+    setTimeout(function () { kirimKeCloud(true); }, 500);
+  }
+}
+
+function pasangEvent() {
+  var i;
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  for (i = 0; i < tabBtns.length; i++) {
+    tabBtns[i].addEventListener('click', function () {
+      pindahTab(this.getAttribute('data-tab'));
+    });
+  }
+  $('cari').addEventListener('input', renderDaftar);
+  $('filterKondisi').addEventListener('change', renderDaftar);
+  $('filterRuangan').addEventListener('change', renderDaftar);
+  $('btnResetFilter').addEventListener('click', function () {
+    $('cari').value = '';
+    $('filterKondisi').value = '';
+    $('filterRuangan').value = '';
+    renderDaftar();
+  });
+  $('btnSimpan').addEventListener('click', simpanFormBarang);
+  $('btnReset').addEventListener('click', resetForm);
+  $('btnHapusRiwayat').addEventListener('click', function () {
+    if (!confirm('Hapus semua riwayat?')) return;
+    riwayat = [];
+    simpanRiwayat();
+    renderRiwayat();
+  });
+  $('galeriFilterRuangan').addEventListener('change', renderGaleri);
+  $('galeriFilterKondisi').addEventListener('change', renderGaleri);
+  $('btnBukaCetak').addEventListener('click', bukaModalCetak);
+  $('btnTutupCetak').addEventListener('click', tutupModalCetak);
+  $('btnCetakSekarang').addEventListener('click', prosesCetak);
+  $('btnTutupLightbox').addEventListener('click', tutupLightbox);
+  $('lightbox').addEventListener('click', function (e) {
+    if (e.target.id === 'lightbox') tutupLightbox();
+  });
+  $('btnExportExcel').addEventListener('click', exportExcel);
+  $('btnExportCSV').addEventListener('click', exportCSV);
+  $('btnImport').addEventListener('click', importDariFile);
+  $('btnExportJSON').addEventListener('click', exportJSON);
+  $('btnRestoreJSON').addEventListener('click', restoreJSON);
+  $('btnResetSemua').addEventListener('click', resetSemua);
+  $('btnSyncKirim').addEventListener('click', function () {
+    if (!confirm('Kirim data lokal ke cloud? Data di cloud akan DITIMPA.')) return;
+    kirimKeCloud(false);
+  });
+  $('btnSyncAmbil').addEventListener('click', function () {
+    if (!confirm('Ambil data dari cloud? Data lokal akan DITIMPA.')) return;
+    tarikDariCloud(false);
+  });
+  $('btnSyncCek').addEventListener('click', cekKoneksiBackend);
+}
+
+function init() {
+  muatData();
+  pasangEvent();
+  renderDaftar();
+  updateStatistik();
+  if (SYNC_OTOMATIS && urlBackendSiap()) {
+    setTimeout(function () { tarikDariCloud(true); }, 800);
+  } else if (!urlBackendSiap()) {
+    setTimeout(function () {
+      tampilkanStatusPesan('ℹ️ Mode lokal aktif. Isi URL_BACKEND untuk sinkronisasi.', 'info');
+    }, 1500);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
